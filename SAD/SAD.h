@@ -1,7 +1,8 @@
+#pragma once
 /* Simple Algorithmic Differentiation (SAD)
 */
 #include <cassert>
-
+#define M_PI       3.14159265358979323846
 // AD session 
 class ADS
 {
@@ -12,7 +13,6 @@ public:
 	static int *cooRow, *cooCol;
 	static float *pd;
 
-	const static int MAX_NVAR = (1<<26);
 	static void Initialize();
 	static void Clear();
 
@@ -125,6 +125,49 @@ __forceinline ADV SquaredError(int m, float *A, ADV *B)
 	return Y;
 }
 
+/*
+		Overloading for float
+*/
 
-void TestCase1();
-void TestCase2();
+_forceinline float Operation1(float lambda, float &A, float &B)
+{
+	float Y;
+	float pd2 = -lambda/2;
+	float pd1 = -3*pd2;
+	Y = pd1*A + pd2*B;
+	return Y;
+}
+
+__forceinline float Operation2(float lambda, float &A)
+{
+	float Y;
+	float pd = -2*lambda;
+	Y = 1 + pd*A;
+	return Y;
+}
+
+__forceinline float Operation3(float lambda, float &A, float &B)
+{
+	float Y;
+	float pd = lambda/2;
+	Y = pd*(A + B);
+	return Y;
+}
+
+__forceinline float Operation4(float lambda, float &A, float &B, float &C)
+{
+	float Y;
+	float pd2 = -lambda;
+	float pd1 = pd2/2;
+	Y = 1 + pd1*(A + C) + pd2*B;
+	return Y;
+}
+
+__forceinline float InnerProd3(float *A, float *B)
+{
+	float Y;
+	Y = A[0]*B[0] + A[1]*B[1] + A[2]*B[2];
+	return Y;
+}
+
+void TestCase4();
