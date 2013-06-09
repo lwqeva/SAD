@@ -3,6 +3,8 @@
 
 #include <cmath>
 #include <cstdio>
+#include <ctime>
+
 #define M_PI       3.14159265358979323846
 
 
@@ -213,9 +215,65 @@ void TestCase3()
 	Rod::Clear();
 }
 
+void TestCase4(int size)
+{
+	clock_t tic = clock();
+	Rod::Initialize(size);	// 430 is maximum
+	int NOI = Rod::M-1;
+
+	float *s = new float[NOI];
+	for(int i = 1; i < Rod::M; ++i)
+	{
+		s[i-1] = (float)i/(float)Rod::M;//(float)( (1 + tanh( (2*i/Rod::M - 1)*M_PI ))/2 );
+	}
+
+	Rod targetRod = Rod::CreateRod(s);
+	Solve_HeatEquation(targetRod.s, targetRod.tN);
+	clock_t toc_fd = clock();
+
+	ADS::Initialize();
+	ADV *S = new ADV[Rod::M-1];
+	for(int i = 0; i < NOI; ++i)
+	{
+		S[i] = (float)0.5*s[i];
+	}
+	
+	ADV *tN = new ADV[Rod::M+1];
+	Solve_HeatEquation(S, tN);
+	ADV sqe = SquaredError(NOI, targetRod.tN+1, tN+1);
+	
+	printf("SqE = %6.4f\n",sqe.v);
+	printf("Number of Variables = %d \tNonzero Partials = %d\n", ADS::nvar, ADS::nnz_pd);
+
+	clock_t toc_sqe = clock();
+	float *J = new float[NOI];
+	ADS::GetJacobianReverse(J, 1, NOI);
+	
+	clock_t toc_grad = clock();
+	ShowJacobian(J, 1, NOI, true);
+
+	float elap = float(toc_fd - tic) / CLOCKS_PER_SEC;
+	printf("\n%8.6f sec\t Forward Solve\n", elap);
+	elap = float(toc_sqe - toc_fd) / CLOCKS_PER_SEC; 
+	printf("\n%8.6f sec\t Squared Error\n", elap);
+	elap = float(toc_grad - toc_sqe) / CLOCKS_PER_SEC; 
+	printf("\n%8.6f sec\t Gradient by Reverse mode\n", elap);
+
+	delete [] s;
+	delete [] S;
+	delete [] tN;
+	targetRod.Destroy();
+	ADS::Clear();
+	Rod::Clear();
+}
 
 int main()
 {
-	TestCase4();
+	clock_t begin = clock();
+	TestCase4(8);  // 430 is maximum
+	clock_t end = clock();
+
+	float elap = float( end - begin ) / CLOCKS_PER_SEC;
+	printf("\n\nTotal Elapse = %f sec\n", elap);
 	return 0;
 }

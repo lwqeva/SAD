@@ -129,7 +129,7 @@ __forceinline ADV SquaredError(int m, float *A, ADV *B)
 		Overloading for float
 */
 
-_forceinline float Operation1(float lambda, float &A, float &B)
+__forceinline float Operation1(float lambda, float &A, float &B)
 {
 	float Y;
 	float pd2 = -lambda/2;
@@ -169,5 +169,3 @@ __forceinline float InnerProd3(float *A, float *B)
 	Y = A[0]*B[0] + A[1]*B[1] + A[2]*B[2];
 	return Y;
 }
-
-void TestCase4();
